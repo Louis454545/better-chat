@@ -3,13 +3,13 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
+import type { Id, Doc } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MoreHorizontal, Plus, Settings, Edit2, Trash2 } from "lucide-react";
 import { ModeToggle } from "@/components/mode-toggle";
 import { SignInButton, SignUpButton, UserButton, SignedIn, SignedOut } from "@clerk/nextjs";
 import Link from "next/link";
-import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import { toast } from "sonner";
 import {
   Sidebar,
@@ -127,7 +127,7 @@ export function AppSidebar({
           <SidebarGroupContent>
             <SidebarMenu>
               <SignedIn>
-                {conversations?.map((conversation) => (
+                {conversations?.map((conversation: Doc<"conversations">) => (
                   <SidebarMenuItem key={conversation._id}>
                     {editingId === conversation._id ? (
                       <div className="flex items-center gap-2 p-2">

@@ -8,7 +8,7 @@ import { MessageSquare, Plus, Settings } from "lucide-react";
 import { ModeToggle } from "@/components/mode-toggle";
 import { SignInButton, SignUpButton, UserButton, SignedIn, SignedOut } from "@clerk/nextjs";
 import Link from "next/link";
-import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
+import type { Id, Doc } from "@my-better-t-app/backend/convex/_generated/dataModel";
 
 interface ConversationListProps {
   selectedConversationId?: Id<"conversations">;
@@ -60,7 +60,7 @@ export function ConversationList({
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
         <SignedIn>
-          {conversations?.map((conversation) => (
+          {conversations?.map((conversation: Doc<"conversations">) => (
             <Card
               key={conversation._id}
               className={`p-3 cursor-pointer transition-colors hover:bg-accent ${
@@ -77,7 +77,7 @@ export function ConversationList({
                     {conversation.title}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {new Date(conversation.createdAt).toLocaleDateString()}
+                    {new Date(conversation._creationTime).toLocaleDateString()}
                   </p>
                 </div>
               </div>

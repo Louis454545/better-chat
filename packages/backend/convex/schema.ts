@@ -4,22 +4,20 @@ import { v } from "convex/values";
 export default defineSchema({
   conversations: defineTable({
     title: v.string(),
-    createdAt: v.number(),
     userId: v.optional(v.string()), // Made optional for migration
     lastAccessedAt: v.optional(v.number()), // For cleanup tracking
-  }).index("by_user_and_created_at", ["userId", "createdAt"])
-    .index("by_last_accessed", ["lastAccessedAt"])
-    .index("by_created_at", ["createdAt"]),
+    createdAt: v.optional(v.number()), // Legacy field - will be migrated to use _creationTime
+  }).index("by_user", ["userId"])
+    .index("by_last_accessed", ["lastAccessedAt"]),
 
   messages: defineTable({
     conversationId: v.id("conversations"),
     role: v.union(v.literal("user"), v.literal("assistant")),
     content: v.string(),
-    createdAt: v.number(),
     attachments: v.optional(v.array(v.id("_storage"))), // File attachments
     lastAccessedAt: v.optional(v.number()), // For cleanup tracking
-  }).index("by_conversation_and_created_at", ["conversationId", "createdAt"])
-    .index("by_conversation", ["conversationId"]),
+    createdAt: v.optional(v.number()), // Legacy field - will be migrated to use _creationTime
+  }).index("by_conversation", ["conversationId"]),
 
   userSettings: defineTable({
     googleApiKey: v.string(),
