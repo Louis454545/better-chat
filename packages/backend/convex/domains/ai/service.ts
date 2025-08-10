@@ -202,7 +202,7 @@ export class AIService {
         // Update the message every batchSize tokens to reduce API calls
         if (updateCount >= batchSize) {
           await ctx.runMutation(api.messages.updateMessage, {
-            messageId: messageId,
+            messageId: messageId as Id<"messages">,
             content: fullText,
           });
           updateCount = 0;
@@ -212,7 +212,7 @@ export class AIService {
       // Final update to ensure all content is saved
       if (updateCount > 0) {
         await ctx.runMutation(api.messages.updateMessage, {
-          messageId: messageId,
+          messageId: messageId as Id<"messages">,
           content: fullText,
         });
       }
