@@ -247,9 +247,18 @@ importers:
 
   packages/backend:
     dependencies:
+      '@ai-sdk/anthropic':
+        specifier: ^2.0.1
+        version: 2.0.1(zod@4.0.17)
       '@ai-sdk/google':
         specifier: ^2.0.3
         version: 2.0.3(zod@4.0.17)
+      '@ai-sdk/groq':
+        specifier: ^2.0.4
+        version: 2.0.4(zod@4.0.17)
+      '@ai-sdk/openai':
+        specifier: ^2.0.8
+        version: 2.0.8(zod@4.0.17)
       ai:
         specifier: ^5.0.9
         version: 5.0.9(zod@4.0.17)
@@ -271,6 +280,12 @@ packages:
       graphql:
         optional: true
 
+  '@ai-sdk/anthropic@2.0.1':
+    resolution: {integrity: sha512-HtNbpNV9qXQosHu00+CBMEcdTerwZY+kpVMNak0xP/P5TF6XkPf7IyizhLuc7y5zcXMjZCMA7jDGkcEdZCEdkw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4
+
   '@ai-sdk/gateway@1.0.4':
     resolution: {integrity: sha512-1roLdgMbFU3Nr4MC97/te7w6OqxsWBkDUkpbCcvxF3jz/ku91WVaJldn/PKU8feMKNyI5W9wnqhbjb1BqbExOQ==}
     engines: {node: '>=18'}
@@ -279,6 +294,18 @@ packages:
 
   '@ai-sdk/google@2.0.3':
     resolution: {integrity: sha512-rQkY4nQGZnQw6pfftqsGsXXAqkGnl1gYjSbvD8+zyrVg2KAYeJU0NxIaacLWCORNcW+yQ/cqTpK/Uku/SIdEqA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4
+
+  '@ai-sdk/groq@2.0.4':
+    resolution: {integrity: sha512-tkTxVR6ZZIiNsqkM5EJ4IjCGD4ljdPxQeFWnIH8Aq0x3zXOl7JNTtNysXEevmIUaPGkLc+Q1tSpmAcOyyuszHA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4
+
+  '@ai-sdk/openai@2.0.8':
+    resolution: {integrity: sha512-D5AP65yCXL4GtTrWGhu3hTHhlKyYu8NBRtRZ1h5F8PYXFVLtuiQ0AypbDreXLphONehLf0zGN3Cm3Fob/DDMRw==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4
@@ -5457,6 +5484,12 @@ snapshots:
 
   '@0no-co/graphql.web@1.2.0': {}
 
+  '@ai-sdk/anthropic@2.0.1(zod@4.0.17)':
+    dependencies:
+      '@ai-sdk/provider': 2.0.0
+      '@ai-sdk/provider-utils': 3.0.1(zod@4.0.17)
+      zod: 4.0.17
+
   '@ai-sdk/gateway@1.0.4(zod@4.0.17)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
@@ -5464,6 +5497,18 @@ snapshots:
       zod: 4.0.17
 
   '@ai-sdk/google@2.0.3(zod@4.0.17)':
+    dependencies:
+      '@ai-sdk/provider': 2.0.0
+      '@ai-sdk/provider-utils': 3.0.1(zod@4.0.17)
+      zod: 4.0.17
+
+  '@ai-sdk/groq@2.0.4(zod@4.0.17)':
+    dependencies:
+      '@ai-sdk/provider': 2.0.0
+      '@ai-sdk/provider-utils': 3.0.1(zod@4.0.17)
+      zod: 4.0.17
+
+  '@ai-sdk/openai@2.0.8(zod@4.0.17)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
       '@ai-sdk/provider-utils': 3.0.1(zod@4.0.17)

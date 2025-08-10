@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:docs.convex.dev)"
+      "WebFetch(domain:docs.convex.dev)",
+      "WebFetch(domain:ai-sdk.dev)",
+      "Bash(pnpm check-types)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }

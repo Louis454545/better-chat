@@ -22,19 +22,6 @@ export const getFileUrl = query({
   },
 });
 
-export const deleteFile = mutation({
-  args: { storageId: v.id("_storage") },
-  returns: v.null(),
-  handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Not authenticated");
-    }
-    
-    await ctx.storage.delete(args.storageId);
-    return null;
-  },
-});
 
 export const getFileMetadata = query({
   args: { storageId: v.id("_storage") },

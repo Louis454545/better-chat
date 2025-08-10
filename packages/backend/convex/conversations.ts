@@ -16,13 +16,29 @@ export const getConversations = query({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     
-    // If not authenticated, return all conversations (for development)
+    // If not authenticated, only allow in development
     if (!identity) {
+      // In production, return empty array for security
+      if (process.env.NODE_ENV === "production") {
+        return [];
+      }
+      
+      // In development, return all conversations with proper index
       const conversations = await ctx.db
         .query("conversations")
+        .withIndex("by_created_at")
         .order("desc")
         .collect();
-      return conversations;
+      
+      // Project only the fields defined in the return validator
+      return conversations.map(conv => ({
+        _id: conv._id,
+        _creationTime: conv._creationTime,
+        title: conv.title,
+        createdAt: conv.createdAt,
+        userId: conv.userId,
+        lastAccessedAt: conv.lastAccessedAt,
+      }));
     }
 
     // If authenticated, return user's conversations
@@ -33,7 +49,16 @@ export const getConversations = query({
       )
       .order("desc")
       .collect();
-    return conversations;
+    
+    // Project only the fields defined in the return validator
+    return conversations.map(conv => ({
+      _id: conv._id,
+      _creationTime: conv._creationTime,
+      title: conv.title,
+      createdAt: conv.createdAt,
+      userId: conv.userId,
+      lastAccessedAt: conv.lastAccessedAt,
+    }));
   },
 });
 
@@ -58,27 +83,3 @@ export const createConversation = mutation({
   },
 });
 
-export const updateLastAccessed = mutation({
-  args: {
-    conversationId: v.id("conversations"),
-  },
-  returns: v.null(),
-  handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Not authenticated");
-    }
-
-    // Verify the conversation belongs to the authenticated user
-    const conversation = await ctx.db.get(args.conversationId);
-    if (!conversation || conversation.userId !== identity.subject) {
-      throw new Error("Conversation not found or unauthorized");
-    }
-
-    await ctx.db.patch(args.conversationId, {
-      lastAccessedAt: Date.now(),
-    });
-    
-    return null;
-  },
-});

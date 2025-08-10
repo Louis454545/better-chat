@@ -19,6 +19,7 @@ import type * as conversations from "../conversations.js";
 import type * as files from "../files.js";
 import type * as healthCheck from "../healthCheck.js";
 import type * as messages from "../messages.js";
+import type * as providers from "../providers.js";
 import type * as settings from "../settings.js";
 
 /**
@@ -36,6 +37,7 @@ declare const fullApi: ApiFromModules<{
   files: typeof files;
   healthCheck: typeof healthCheck;
   messages: typeof messages;
+  providers: typeof providers;
   settings: typeof settings;
 }>;
 export declare const api: FilterApi<

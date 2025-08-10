@@ -8,7 +8,8 @@ export default defineSchema({
     userId: v.optional(v.string()), // Made optional for migration
     lastAccessedAt: v.optional(v.number()), // For cleanup tracking
   }).index("by_user_and_created_at", ["userId", "createdAt"])
-    .index("by_last_accessed", ["lastAccessedAt"]),
+    .index("by_last_accessed", ["lastAccessedAt"])
+    .index("by_created_at", ["createdAt"]),
 
   messages: defineTable({
     conversationId: v.id("conversations"),

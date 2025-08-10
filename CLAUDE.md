@@ -123,7 +123,6 @@ Follow the comprehensive Convex rules documented in `ai_docs/convex/convex_rules
 #### Conversations (`convex/conversations.ts`)
 - `getConversations` - List user's conversations
 - `createConversation` - Create new conversation
-- `updateLastAccessed` - Track conversation activity
 
 #### Messages (`convex/messages.ts`)
 - `getMessages` - Get messages for a conversation
@@ -241,3 +240,4 @@ Do what has been asked; nothing more, nothing less.
 NEVER create files unless they're absolutely necessary for achieving your goal.
 ALWAYS prefer editing an existing file to creating a new one.
 NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
+- utilise tout le temps pnpm
