@@ -1,0 +1,62 @@
+Components
+Copy Page
+
+Here you can find all the components available in the library. We are working on adding more components.
+
+Accordion
+Alert
+Alert Dialog
+Aspect Ratio
+Avatar
+Badge
+Breadcrumb
+Button
+Calendar
+Card
+Carousel
+Chart
+Checkbox
+Collapsible
+Combobox
+Command
+Context Menu
+Data Table
+Date Picker
+Dialog
+Drawer
+Dropdown Menu
+React Hook Form
+Hover Card
+Input
+Input OTP
+Label
+Menubar
+Navigation Menu
+Pagination
+Popover
+Progress
+Radio Group
+Resizable
+Scroll-area
+Select
+Separator
+Sheet
+Sidebar
+Skeleton
+Slider
+Sonner
+Switch
+Table
+Tabs
+Textarea
+Toast
+Toggle
+Toggle Group
+Tooltip
+Typography
+
+
+Add Components
+You can now start adding components to your project.
+
+pnpm dlx shadcn@latest add button
