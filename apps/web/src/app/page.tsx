@@ -7,11 +7,10 @@ import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import { ConversationList } from "@/components/chat/conversation-list";
 import { Button } from "@/components/ui/button";
-import { Settings } from "lucide-react";
+import { Settings, Paperclip, X } from "lucide-react";
 import { SignInButton, SignUpButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { toast } from "sonner";
-import { useChat } from '@ai-sdk/react';
 import {
   Conversation,
   ConversationContent,
@@ -20,6 +19,7 @@ import {
 import { Message, MessageContent } from '@/components/ai-elements/message';
 import {
   PromptInput,
+  PromptInputButton,
   PromptInputModelSelect,
   PromptInputModelSelectContent,
   PromptInputModelSelectItem,
@@ -43,6 +43,10 @@ const googleModels = [
 function ChatInterface() {
   const [selectedConversationId, setSelectedConversationId] = useState<Id<"conversations"> | null>(null);
   const [selectedModel, setSelectedModel] = useState(googleModels[0].value);
+  const [input, setInput] = useState('');
+  const [attachments, setAttachments] = useState<Array<{ id: Id<"_storage">; name: string; url: string }>>([]);
+  const [uploading, setUploading] = useState(false);
+  const [generating, setGenerating] = useState(false);
 
   const userSettings = useQuery(api.settings.getUserSettings);
   const messages = useQuery(
@@ -52,8 +56,9 @@ function ChatInterface() {
 
   const createConversation = useMutation(api.conversations.createConversation);
   const saveMessage = useMutation(api.messages.saveMessage);
-  const generateAIResponse = useAction(api.ai.generateAIResponse);
+  const generateAIResponseStream = useAction(api.ai.generateAIResponseStream);
   const updateUserSettings = useMutation(api.settings.updateUserSettings);
+  const generateUploadUrl = useMutation(api.files.generateUploadUrl);
 
   // Update selected model when user settings change
   useEffect(() => {
@@ -62,23 +67,65 @@ function ChatInterface() {
     }
   }, [userSettings]);
 
-  // Custom chat implementation using Convex instead of API routes
-  const handleSendMessage = async (content: string) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files?.length) return;
+
+    setUploading(true);
+    
+    try {
+      for (const file of Array.from(files)) {
+        const uploadUrl = await generateUploadUrl();
+        const result = await fetch(uploadUrl, {
+          method: "POST",
+          headers: { "Content-Type": file.type },
+          body: file,
+        });
+        const { storageId } = await result.json();
+        const tempUrl = URL.createObjectURL(file);
+        
+        setAttachments(prev => [...prev, {
+          id: storageId,
+          name: file.name,
+          url: tempUrl
+        }]);
+      }
+    } catch (error) {
+      console.error("Upload failed:", error);
+      toast.error("Failed to upload file");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeAttachment = (id: Id<"_storage">) => {
+    setAttachments(prev => {
+      const attachment = prev.find(a => a.id === id);
+      if (attachment?.url.startsWith('blob:')) {
+        URL.revokeObjectURL(attachment.url);
+      }
+      return prev.filter(a => a.id !== id);
+    });
+  };
+
+  const handleSendMessage = async (content: string, attachments?: Id<"_storage">[]) => {
     if (!selectedConversationId || !userSettings?.googleApiKey) {
       toast.error("Please select a conversation and configure your API key");
       return;
     }
 
+    setGenerating(true);
     try {
       // Save user message
       await saveMessage({
         conversationId: selectedConversationId,
         role: "user",
         content,
+        attachments,
       });
 
-      // Generate AI response using Convex action
-      await generateAIResponse({
+      // Generate AI response with streaming
+      await generateAIResponseStream({
         conversationId: selectedConversationId,
         apiKey: userSettings.googleApiKey,
         selectedModel: selectedModel,
@@ -86,6 +133,24 @@ function ChatInterface() {
     } catch (error) {
       console.error("Error sending message:", error);
       toast.error("Failed to send message");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if ((input.trim() || attachments.length > 0) && !generating && !uploading) {
+      handleSendMessage(input.trim(), attachments.map(a => a.id));
+      setInput('');
+      
+      // Clean up blob URLs
+      attachments.forEach(attachment => {
+        if (attachment.url.startsWith('blob:')) {
+          URL.revokeObjectURL(attachment.url);
+        }
+      });
+      setAttachments([]);
     }
   };
 
@@ -110,21 +175,9 @@ function ChatInterface() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
-    const input = formData.get('message') as string;
-    if (input?.trim()) {
-      handleSendMessage(input.trim());
-      // Clear the form
-      (e.target as HTMLFormElement).reset();
-    }
-  };
-
   if (!userSettings?.googleApiKey) {
     return (
       <div className="flex h-screen">
-        {/* Sidebar */}
         <div className="w-80 border-r bg-muted/10">
           <ConversationList
             selectedConversationId={selectedConversationId}
@@ -132,8 +185,6 @@ function ChatInterface() {
             onNewConversation={handleNewConversation}
           />
         </div>
-
-        {/* Main Chat Area */}
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center space-y-4">
             <h1 className="text-2xl font-bold">Welcome to AI Chat</h1>
@@ -154,7 +205,6 @@ function ChatInterface() {
 
   return (
     <div className="flex h-screen">
-      {/* Sidebar */}
       <div className="w-80 border-r bg-muted/10">
         <ConversationList
           selectedConversationId={selectedConversationId}
@@ -163,46 +213,111 @@ function ChatInterface() {
         />
       </div>
 
-      {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
         {selectedConversationId ? (
-          <div className="flex-1 flex flex-col p-4">
-            <Conversation className="flex-1">
-              <ConversationContent>
-                {messages?.map((message) => (
-                  <Message from={message.role} key={message._id}>
-                    <MessageContent>
-                      <Response>{message.content}</Response>
-                    </MessageContent>
-                  </Message>
-                ))}
-              </ConversationContent>
-              <ConversationScrollButton />
-            </Conversation>
+          <div className="max-w-4xl mx-auto p-6 relative size-full h-screen">
+            <div className="flex flex-col h-full">
+              <Conversation className="h-full">
+                <ConversationContent>
+                  {messages?.map((message) => (
+                    <Message from={message.role} key={message._id}>
+                      <MessageContent>
+                        {/* Show attachments */}
+                        {message.attachments && message.attachments.length > 0 && (
+                          <div className="space-y-2 mb-2">
+                            {message.attachments.map((storageId) => (
+                              <AttachmentDisplay key={storageId} storageId={storageId} />
+                            ))}
+                          </div>
+                        )}
+                        
+                        {/* Show message content */}
+                        {message.content && (
+                          <Response>{message.content}</Response>
+                        )}
+                      </MessageContent>
+                    </Message>
+                  ))}
+                  {generating && <Loader />}
+                </ConversationContent>
+                <ConversationScrollButton />
+              </Conversation>
 
-            <PromptInput onSubmit={handleSubmit} className="mt-4">
-              <PromptInputTextarea name="message" placeholder="Type your message..." />
-              <PromptInputToolbar>
-                <PromptInputTools>
-                  <PromptInputModelSelect
-                    onValueChange={handleModelChange}
-                    value={selectedModel}
-                  >
-                    <PromptInputModelSelectTrigger>
-                      <PromptInputModelSelectValue />
-                    </PromptInputModelSelectTrigger>
-                    <PromptInputModelSelectContent>
-                      {googleModels.map((model) => (
-                        <PromptInputModelSelectItem key={model.value} value={model.value}>
-                          {model.name}
-                        </PromptInputModelSelectItem>
+              <div>
+                {/* Attachments preview */}
+                {attachments.length > 0 && (
+                  <div className="p-4 pb-0">
+                    <div className="flex flex-wrap gap-2">
+                      {attachments.map((attachment) => (
+                        <div key={attachment.id} className="flex items-center gap-2 bg-secondary rounded-md px-3 py-2">
+                          <span className="text-sm text-foreground truncate max-w-32">
+                            {attachment.name}
+                          </span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeAttachment(attachment.id)}
+                            className="h-4 w-4 p-0"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
                       ))}
-                    </PromptInputModelSelectContent>
-                  </PromptInputModelSelect>
-                </PromptInputTools>
-                <PromptInputSubmit />
-              </PromptInputToolbar>
-            </PromptInput>
+                    </div>
+                  </div>
+                )}
+
+                <PromptInput onSubmit={handleSubmit} className="mt-4">
+                  <PromptInputTextarea
+                    onChange={(e) => setInput(e.target.value)}
+                    value={input}
+                    placeholder="Type your message..."
+                  />
+                  <PromptInputToolbar>
+                    <PromptInputTools>
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*,application/pdf,.txt,.doc,.docx"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                        id="file-upload"
+                      />
+                      <PromptInputButton
+                        type="button"
+                        variant="ghost"
+                        onClick={() => document.getElementById('file-upload')?.click()}
+                        disabled={uploading}
+                      >
+                        <Paperclip className="h-4 w-4" />
+                        <span>Attach</span>
+                      </PromptInputButton>
+                      
+                      <PromptInputModelSelect
+                        onValueChange={handleModelChange}
+                        value={selectedModel}
+                      >
+                        <PromptInputModelSelectTrigger>
+                          <PromptInputModelSelectValue />
+                        </PromptInputModelSelectTrigger>
+                        <PromptInputModelSelectContent>
+                          {googleModels.map((model) => (
+                            <PromptInputModelSelectItem key={model.value} value={model.value}>
+                              {model.name}
+                            </PromptInputModelSelectItem>
+                          ))}
+                        </PromptInputModelSelectContent>
+                      </PromptInputModelSelect>
+                    </PromptInputTools>
+                    <PromptInputSubmit 
+                      disabled={(!input.trim() && attachments.length === 0) || generating || uploading}
+                      status={generating ? 'streaming' : 'ready'}
+                    />
+                  </PromptInputToolbar>
+                </PromptInput>
+              </div>
+            </div>
           </div>
         ) : (
           <div className="flex-1 flex items-center justify-center">
@@ -216,10 +331,41 @@ function ChatInterface() {
   );
 }
 
+function AttachmentDisplay({ storageId }: { storageId: Id<"_storage"> }) {
+  const fileUrl = useQuery(api.files.getFileUrl, { storageId });
+  const metadata = useQuery(api.files.getFileMetadata, { storageId });
+
+  if (!fileUrl || !metadata) return null;
+
+  const isImage = metadata.contentType?.startsWith('image/');
+  
+  return (
+    <div className="border rounded-md p-2 bg-secondary/50">
+      {isImage ? (
+        <img 
+          src={fileUrl} 
+          alt="Uploaded image" 
+          className="max-w-xs max-h-48 rounded object-cover"
+        />
+      ) : (
+        <div className="flex items-center gap-2">
+          <div className="flex-1">
+            <div className="text-sm font-medium truncate">
+              File attachment
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {metadata.contentType} • {(metadata.size / 1024).toFixed(1)} KB
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function UnauthenticatedView() {
   return (
     <div className="flex h-screen">
-      {/* Sidebar */}
       <div className="w-80 border-r bg-muted/10">
         <ConversationList
           selectedConversationId={undefined}
@@ -227,8 +373,6 @@ function UnauthenticatedView() {
           onNewConversation={() => {}}
         />
       </div>
-
-      {/* Main Chat Area */}
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center space-y-4 max-w-md">
           <h1 className="text-3xl font-bold">Welcome to AI Chat</h1>
