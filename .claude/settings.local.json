@@ -5,7 +5,8 @@
       "WebFetch(domain:ai-sdk.dev)",
       "Bash(pnpm check-types)",
       "Bash(rm:*)",
-      "WebFetch(domain:ui.shadcn.com)"
+      "WebFetch(domain:ui.shadcn.com)",
+      "WebFetch(domain:clerk.com)"
     ],
     "deny": []
   }

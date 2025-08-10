@@ -9,7 +9,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { Button } from "@/components/ui/button";
 import { Settings, Paperclip, X } from "lucide-react";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
-import { SignInButton, SignUpButton } from "@clerk/nextjs";
+import { SignInButton, SignUpButton, useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import { toast } from "sonner";
 import {
@@ -33,6 +33,7 @@ import {
 } from '@/components/ai-elements/prompt-input';
 import { Response } from '@/components/ai-elements/response';
 import { Loader } from '@/components/ai-elements/loader';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const googleModels = [
   { name: 'Gemini 2.5 Flash', value: 'gemini-2.5-flash' },
@@ -194,34 +195,6 @@ function ChatInterface() {
       toast.error("Failed to create conversation");
     }
   };
-
-  if (!userSettings?.googleApiKey) {
-    return (
-      <SidebarProvider>
-        <AppSidebar
-          selectedConversationId={selectedConversationId}
-          onSelectConversation={setSelectedConversationId}
-          onNewConversation={handleNewConversation}
-        />
-        <SidebarInset>
-          <div className="flex h-full items-center justify-center">
-            <div className="text-center space-y-4">
-              <h1 className="text-2xl font-bold">Welcome to AI Chat</h1>
-              <p className="text-muted-foreground">
-                Please configure your Google AI settings to get started
-              </p>
-              <Link href="/settings">
-                <Button>
-                  <Settings className="h-4 w-4 mr-2" />
-                  Go to Settings
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </SidebarInset>
-      </SidebarProvider>
-    );
-  }
 
   return (
     <SidebarProvider>
@@ -466,6 +439,45 @@ function AttachmentDisplay({ storageId }: { storageId: Id<"_storage"> }) {
   );
 }
 
+function AuthLoadingSkeleton() {
+  return (
+    <SidebarProvider>
+      <div className="flex h-screen">
+        {/* Sidebar skeleton */}
+        <div className="w-64 border-r bg-background">
+          <div className="p-4">
+            <Skeleton className="h-10 w-full" /> {/* New Chat button skeleton */}
+          </div>
+          <div className="p-4 space-y-2">
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-8 w-3/4" />
+            <Skeleton className="h-8 w-5/6" />
+            <Skeleton className="h-8 w-4/5" />
+            <Skeleton className="h-8 w-2/3" />
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 p-4 border-t">
+            <div className="flex items-center justify-between gap-2">
+              <Skeleton className="h-9 w-9" /> {/* Settings button skeleton */}
+              <Skeleton className="h-9 w-9" /> {/* User button skeleton */}
+              <Skeleton className="h-9 w-9" /> {/* Theme toggle skeleton */}
+            </div>
+          </div>
+        </div>
+        
+        {/* Main content skeleton */}
+        <div className="flex-1 flex flex-col">
+          <div className="h-16 border-b p-4 flex items-center gap-2">
+            <Skeleton className="h-6 w-6" /> {/* Sidebar trigger skeleton */}
+          </div>
+          <div className="flex-1 flex items-center justify-center">
+            <Loader />
+          </div>
+        </div>
+      </div>
+    </SidebarProvider>
+  );
+}
+
 function UnauthenticatedView() {
   return (
     <SidebarProvider>
@@ -497,20 +509,28 @@ function UnauthenticatedView() {
   );
 }
 
-export default function Home() {
+function AuthStateManager() {
+  const { isLoaded, isSignedIn } = useAuth();
+
   return (
     <>
-      <AuthLoading>
-        <div className="flex h-screen items-center justify-center">
-          <Loader />
-        </div>
-      </AuthLoading>
       <Authenticated>
         <ChatInterface />
       </Authenticated>
       <Unauthenticated>
         <UnauthenticatedView />
       </Unauthenticated>
+    </>
+  );
+}
+
+export default function Home() {
+  return (
+    <>
+      <AuthLoading>
+        <div></div>
+      </AuthLoading>
+      <AuthStateManager />
     </>
   );
 }
