@@ -64,7 +64,7 @@ export const getConversations = query({
 
 export const createConversation = mutation({
   args: {
-    title: v.string(),
+    title: v.optional(v.string()),
   },
   returns: v.id("conversations"),
   handler: async (ctx, args) => {
@@ -74,12 +74,74 @@ export const createConversation = mutation({
     }
 
     const conversationId = await ctx.db.insert("conversations", {
-      title: args.title,
+      title: args.title || `Chat ${new Date().toLocaleDateString()}`,
       createdAt: Date.now(),
       userId: identity.subject,
       lastAccessedAt: Date.now(),
     });
     return conversationId;
+  },
+});
+
+export const updateConversationTitle = mutation({
+  args: {
+    conversationId: v.id("conversations"),
+    title: v.string(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const conversation = await ctx.db.get(args.conversationId);
+    if (!conversation) {
+      throw new Error("Conversation not found");
+    }
+
+    if (conversation.userId !== identity.subject) {
+      throw new Error("Not authorized to update this conversation");
+    }
+
+    await ctx.db.patch(args.conversationId, {
+      title: args.title,
+    });
+  },
+});
+
+export const deleteConversation = mutation({
+  args: {
+    conversationId: v.id("conversations"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const conversation = await ctx.db.get(args.conversationId);
+    if (!conversation) {
+      throw new Error("Conversation not found");
+    }
+
+    if (conversation.userId !== identity.subject) {
+      throw new Error("Not authorized to delete this conversation");
+    }
+
+    // Delete all messages in the conversation
+    const messages = await ctx.db
+      .query("messages")
+      .withIndex("by_conversation", (q) => q.eq("conversationId", args.conversationId))
+      .collect();
+
+    for (const message of messages) {
+      await ctx.db.delete(message._id);
+    }
+
+    // Delete the conversation
+    await ctx.db.delete(args.conversationId);
   },
 });
 

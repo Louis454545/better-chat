@@ -18,7 +18,8 @@ export default defineSchema({
     createdAt: v.number(),
     attachments: v.optional(v.array(v.id("_storage"))), // File attachments
     lastAccessedAt: v.optional(v.number()), // For cleanup tracking
-  }).index("by_conversation_and_created_at", ["conversationId", "createdAt"]),
+  }).index("by_conversation_and_created_at", ["conversationId", "createdAt"])
+    .index("by_conversation", ["conversationId"]),
 
   userSettings: defineTable({
     googleApiKey: v.string(),
