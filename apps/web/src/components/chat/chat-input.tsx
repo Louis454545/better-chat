@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Send, Paperclip, X } from "lucide-react";
 import { useMutation } from "convex/react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
-import { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
+import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 
 interface ChatInputProps {
   onSendMessage: (message: string, attachments?: Id<"_storage">[]) => void;

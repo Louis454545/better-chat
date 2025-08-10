@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Bot, User, Download } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
-import { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
+import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 
 interface ChatMessageProps {

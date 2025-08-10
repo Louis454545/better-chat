@@ -8,7 +8,7 @@ import { MessageSquare, Plus, Settings } from "lucide-react";
 import { ModeToggle } from "@/components/mode-toggle";
 import { SignInButton, SignUpButton, UserButton, SignedIn, SignedOut } from "@clerk/nextjs";
 import Link from "next/link";
-import { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
+import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 
 interface ConversationListProps {
   selectedConversationId?: Id<"conversations">;

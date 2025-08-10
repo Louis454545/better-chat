@@ -40,8 +40,19 @@ const googleModels = [
   { name: 'Gemini 1.5 Pro', value: 'gemini-1.5-pro' },
 ];
 
+type MessageType = {
+  _id: Id<"messages">;
+  _creationTime: number;
+  conversationId: Id<"conversations">;
+  role: "user" | "assistant";
+  content: string;
+  createdAt: number;
+  attachments?: Id<"_storage">[];
+  lastAccessedAt?: number;
+};
+
 function ChatInterface() {
-  const [selectedConversationId, setSelectedConversationId] = useState<Id<"conversations"> | null>(null);
+  const [selectedConversationId, setSelectedConversationId] = useState<Id<"conversations"> | undefined>(undefined);
   const [selectedModel, setSelectedModel] = useState(googleModels[0].value);
   const [input, setInput] = useState('');
   const [attachments, setAttachments] = useState<Array<{ id: Id<"_storage">; name: string; url: string }>>([]);
@@ -219,13 +230,13 @@ function ChatInterface() {
             <div className="flex flex-col h-full">
               <Conversation className="h-full">
                 <ConversationContent>
-                  {messages?.map((message) => (
+                  {messages?.map((message: MessageType) => (
                     <Message from={message.role} key={message._id}>
                       <MessageContent>
                         {/* Show attachments */}
                         {message.attachments && message.attachments.length > 0 && (
                           <div className="space-y-2 mb-2">
-                            {message.attachments.map((storageId) => (
+                            {message.attachments.map((storageId: Id<"_storage">) => (
                               <AttachmentDisplay key={storageId} storageId={storageId} />
                             ))}
                           </div>

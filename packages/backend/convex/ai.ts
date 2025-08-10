@@ -13,7 +13,7 @@ export const generateAIResponseStream = action({
     selectedModel: v.string(),
   },
   returns: v.string(),
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<string> => {
     try {
       const identity = await ctx.auth.getUserIdentity();
       if (!identity) {
@@ -22,7 +22,7 @@ export const generateAIResponseStream = action({
 
       // Verify the conversation belongs to the authenticated user
       const conversation = await ctx.runQuery(api.conversations.getConversations);
-      const userConversation = conversation.find(c => c._id === args.conversationId);
+      const userConversation = conversation.find((c: any) => c._id === args.conversationId);
       if (!userConversation) {
         throw new Error("Conversation not found or unauthorized");
       }
@@ -33,12 +33,12 @@ export const generateAIResponseStream = action({
       });
 
       // Transform messages for AI SDK with file support
-      const aiMessages = [];
+      const aiMessages: any[] = [];
       
       for (const msg of messages) {
         if (msg.attachments && msg.attachments.length > 0) {
           // Message with attachments - create content array
-          const content = [];
+          const content: any[] = [];
           
           // Add text content if exists
           if (msg.content.trim()) {
@@ -52,7 +52,7 @@ export const generateAIResponseStream = action({
           for (const fileId of msg.attachments) {
             try {
               // Get file metadata from query
-              const metadata = await ctx.runQuery(api.files.getFileMetadata, { storageId: fileId });
+              const metadata: any = await ctx.runQuery(api.files.getFileMetadata, { storageId: fileId });
               
               if (metadata) {
                 // Get file data from storage (actions can access storage directly)
@@ -69,7 +69,7 @@ export const generateAIResponseStream = action({
                   });
                 }
               }
-            } catch (error) {
+            } catch (error: any) {
               console.error(`Failed to load file ${fileId}:`, error);
             }
           }
@@ -96,11 +96,10 @@ export const generateAIResponseStream = action({
       const model = google(args.selectedModel);
 
       // Stream AI response
-      const result = await streamText({
+      const result: any = await streamText({
         model: model,
         messages: aiMessages,
         temperature: 0.7,
-        maxTokens: 2000,
       });
 
       // Create assistant message placeholder
@@ -110,7 +109,7 @@ export const generateAIResponseStream = action({
         content: "",
       });
 
-      let fullText = "";
+      let fullText: string = "";
       
       // Process stream and update message
       for await (const textPart of result.textStream) {
@@ -124,7 +123,7 @@ export const generateAIResponseStream = action({
       }
 
       return fullText;
-    } catch (error) {
+    } catch (error: any) {
       if (error.message?.includes('API key')) {
         throw new Error('Invalid Google AI API key');
       } else if (error.message?.includes('model')) {
@@ -146,7 +145,7 @@ export const generateAIResponse = action({
     selectedModel: v.string(),
   },
   returns: v.string(),
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<string> => {
     try {
       const identity = await ctx.auth.getUserIdentity();
       if (!identity) {
@@ -155,7 +154,7 @@ export const generateAIResponse = action({
 
       // Verify the conversation belongs to the authenticated user
       const conversation = await ctx.runQuery(api.conversations.getConversations);
-      const userConversation = conversation.find(c => c._id === args.conversationId);
+      const userConversation = conversation.find((c: any) => c._id === args.conversationId);
       if (!userConversation) {
         throw new Error("Conversation not found or unauthorized");
       }
@@ -166,12 +165,12 @@ export const generateAIResponse = action({
       });
 
       // Transform messages for AI SDK with file support
-      const aiMessages = [];
+      const aiMessages: any[] = [];
       
       for (const msg of messages) {
         if (msg.attachments && msg.attachments.length > 0) {
           // Message with attachments - create content array
-          const content = [];
+          const content: any[] = [];
           
           // Add text content if exists
           if (msg.content.trim()) {
@@ -185,7 +184,7 @@ export const generateAIResponse = action({
           for (const fileId of msg.attachments) {
             try {
               // Get file metadata from query
-              const metadata = await ctx.runQuery(api.files.getFileMetadata, { storageId: fileId });
+              const metadata: any = await ctx.runQuery(api.files.getFileMetadata, { storageId: fileId });
               
               if (metadata) {
                 // Get file data from storage (actions can access storage directly)
@@ -202,7 +201,7 @@ export const generateAIResponse = action({
                   });
                 }
               }
-            } catch (error) {
+            } catch (error: any) {
               console.error(`Failed to load file ${fileId}:`, error);
             }
           }
@@ -229,15 +228,14 @@ export const generateAIResponse = action({
       const model = google(args.selectedModel);
 
       // Generate AI response
-      const result = await streamText({
+      const result: any = await streamText({
         model: model,
         messages: aiMessages,
         temperature: 0.7,
-        maxTokens: 2000,
       });
 
       // Get the full text
-      const fullText = await result.text;
+      const fullText: string = await result.text;
 
       // Save the AI response to the database
       await ctx.runMutation(api.messages.saveMessage, {
@@ -247,7 +245,7 @@ export const generateAIResponse = action({
       });
 
       return fullText;
-    } catch (error) {
+    } catch (error: any) {
       if (error.message?.includes('API key')) {
         throw new Error('Invalid Google AI API key');
       } else if (error.message?.includes('model')) {
