@@ -5,7 +5,14 @@
 		"build": {
 			"dependsOn": ["^build"],
 			"inputs": ["$TURBO_DEFAULT$", ".env*"],
-			"outputs": ["dist/**"]
+			"outputs": ["dist/**"],
+			"env": [
+				"CONVEX_DEPLOYMENT",
+				"CLERK_SECRET_KEY", 
+				"CLERK_FRONTEND_API_URL",
+				"NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+				"NEXT_PUBLIC_CONVEX_URL"
+			]
 		},
 		"lint": {
 			"dependsOn": ["^lint"]
@@ -21,6 +28,5 @@
 			"cache": false,
 			"persistent": true
 		}
-		
-			}
+	}
 }

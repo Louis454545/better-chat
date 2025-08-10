@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { Authenticated, Unauthenticated, AuthLoading } from "convex/react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
-import { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
+import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import { ConversationList } from "@/components/chat/conversation-list";
 import { Button } from "@/components/ui/button";
 import { Settings, Paperclip, X } from "lucide-react";
