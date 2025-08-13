@@ -13,8 +13,6 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
-import type * as ai from "../ai.js";
-import type * as conversations from "../conversations.js";
 import type * as cron_index from "../cron/index.js";
 import type * as domains_ai_index from "../domains/ai/index.js";
 import type * as domains_ai_service from "../domains/ai/service.js";
@@ -27,9 +25,6 @@ import type * as domains_messages_index from "../domains/messages/index.js";
 import type * as domains_messages_service from "../domains/messages/service.js";
 import type * as domains_settings_index from "../domains/settings/index.js";
 import type * as domains_settings_service from "../domains/settings/service.js";
-import type * as files from "../files.js";
-import type * as messages from "../messages.js";
-import type * as settings from "../settings.js";
 import type * as shared_errors_index from "../shared/errors/index.js";
 import type * as shared_middleware_auth from "../shared/middleware/auth.js";
 import type * as shared_middleware_index from "../shared/middleware/index.js";
@@ -45,8 +40,6 @@ import type * as shared_types_validators from "../shared/types/validators.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
-  ai: typeof ai;
-  conversations: typeof conversations;
   "cron/index": typeof cron_index;
   "domains/ai/index": typeof domains_ai_index;
   "domains/ai/service": typeof domains_ai_service;
@@ -59,9 +52,6 @@ declare const fullApi: ApiFromModules<{
   "domains/messages/service": typeof domains_messages_service;
   "domains/settings/index": typeof domains_settings_index;
   "domains/settings/service": typeof domains_settings_service;
-  files: typeof files;
-  messages: typeof messages;
-  settings: typeof settings;
   "shared/errors/index": typeof shared_errors_index;
   "shared/middleware/auth": typeof shared_middleware_auth;
   "shared/middleware/index": typeof shared_middleware_index;

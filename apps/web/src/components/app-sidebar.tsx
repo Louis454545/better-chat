@@ -44,9 +44,9 @@ export function AppSidebar({
   const [editingId, setEditingId] = useState<Id<"conversations"> | null>(null);
   const [editTitle, setEditTitle] = useState("");
 
-  const conversations = useQuery(api.conversations.getConversations);
-  const updateConversationTitle = useMutation(api.conversations.updateConversationTitle);
-  const deleteConversation = useMutation(api.conversations.deleteConversation);
+  const conversations = useQuery(api.domains.conversations.index.getConversations);
+  const updateConversationTitle = useMutation(api.domains.conversations.index.updateConversationTitle);
+  const deleteConversation = useMutation(api.domains.conversations.index.deleteConversation);
 
   const handleEditStart = (conversation: { _id: Id<"conversations">; title: string }) => {
     setEditingId(conversation._id);

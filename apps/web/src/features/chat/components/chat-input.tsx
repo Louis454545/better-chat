@@ -1,19 +1,19 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { X, Paperclip } from "lucide-react";
+import { ArrowUp, Paperclip, Square, X } from "lucide-react";
 import {
   PromptInput,
-  PromptInputButton,
-  PromptInputModelSelect,
-  PromptInputModelSelectContent,
-  PromptInputModelSelectItem,
-  PromptInputModelSelectTrigger,
-  PromptInputModelSelectValue,
-  PromptInputSubmit,
   PromptInputTextarea,
-  PromptInputToolbar,
-  PromptInputTools,
-} from '@/components/ai-elements/prompt-input';
+  PromptInputActions,
+  PromptInputAction,
+} from "@/components/ui/prompt-input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { 
   FileAttachment, 
   AIModel, 
@@ -25,44 +25,6 @@ import type {
 } from "@/shared/types";
 import { GOOGLE_MODELS } from "@/shared/types";
 
-interface AttachmentPreviewProps extends BaseComponentProps {
-  attachments: FileAttachment[];
-  onRemoveAttachment: FileRemoveHandler;
-}
-
-export function AttachmentPreview({ 
-  attachments, 
-  onRemoveAttachment,
-  className = "" 
-}: AttachmentPreviewProps) {
-  if (attachments.length === 0) return null;
-
-  return (
-    <div className={`p-4 pb-0 ${className}`}>
-      <div className="flex flex-wrap gap-2">
-        {attachments.map((attachment) => (
-          <div 
-            key={attachment.id} 
-            className="flex items-center gap-2 bg-secondary rounded-md px-3 py-2"
-          >
-            <span className="text-sm text-foreground truncate max-w-32">
-              {attachment.name}
-            </span>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => onRemoveAttachment(attachment.id)}
-              className="h-4 w-4 p-0"
-            >
-              <X className="h-3 w-3" />
-            </Button>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 interface ChatInputProps extends BaseComponentProps {
   input: string;
@@ -96,8 +58,7 @@ export function ChatInput({
   fileInputId = "file-upload",
   className = ""
 }: ChatInputProps) {
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = () => {
     if ((input.trim() || attachments.length > 0) && !isGenerating && !isUploading) {
       onSubmit(input.trim(), attachments.map(a => a.id));
     }
@@ -119,58 +80,87 @@ export function ChatInput({
   return (
     <div className={className}>
       {/* Attachments preview */}
-      <AttachmentPreview 
-        attachments={attachments}
-        onRemoveAttachment={onRemoveAttachment}
-      />
+      {attachments.length > 0 && (
+        <div className="flex flex-wrap gap-2 pb-2">
+          {attachments.map((attachment) => (
+            <div
+              key={attachment.id}
+              className="bg-secondary flex items-center gap-2 rounded-lg px-3 py-2 text-sm"
+              onClick={e => e.stopPropagation()}
+            >
+              <Paperclip className="size-4" />
+              <span className="max-w-[120px] truncate">{attachment.name}</span>
+              <button
+                onClick={() => onRemoveAttachment(attachment.id)}
+                className="hover:bg-secondary/50 rounded-full p-1"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
-      <PromptInput onSubmit={handleSubmit} className="mt-4">
-        <PromptInputTextarea
-          onChange={(e) => onInputChange(e.target.value)}
-          value={input}
-          placeholder={placeholder}
-        />
-        <PromptInputToolbar>
-          <PromptInputTools>
-            <input
-              type="file"
-              multiple
-              accept="image/*,application/pdf,.txt,.doc,.docx"
-              onChange={handleFileChange}
-              className="hidden"
-              id={fileInputId}
-            />
-            <PromptInputButton
-              type="button"
-              variant="ghost"
-              onClick={handleFileButtonClick}
-              disabled={isUploading}
-            >
-              <Paperclip className="h-4 w-4" />
-              <span>Attach</span>
-            </PromptInputButton>
-            
-            <PromptInputModelSelect
-              onValueChange={onModelChange}
-              value={selectedModel}
-            >
-              <PromptInputModelSelectTrigger>
-                <PromptInputModelSelectValue />
-              </PromptInputModelSelectTrigger>
-              <PromptInputModelSelectContent>
+      <PromptInput
+        value={input}
+        onValueChange={onInputChange}
+        isLoading={isGenerating || isUploading}
+        onSubmit={handleSubmit}
+        className="w-full"
+      >
+        <PromptInputTextarea placeholder={placeholder} />
+
+        <PromptInputActions className="flex items-center justify-between gap-2 pt-2">
+          <div className="flex items-center gap-2">
+            <PromptInputAction tooltip="Attach files">
+              <label
+                htmlFor={fileInputId}
+                className="hover:bg-secondary-foreground/10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-2xl"
+              >
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*,application/pdf,.txt,.doc,.docx"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  id={fileInputId}
+                />
+                <Paperclip className="text-primary size-5" />
+              </label>
+            </PromptInputAction>
+
+            <Select value={selectedModel} onValueChange={onModelChange}>
+              <SelectTrigger className="w-auto">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
                 {models.map((model) => (
-                  <PromptInputModelSelectItem key={model.value} value={model.value}>
+                  <SelectItem key={model.value} value={model.value}>
                     {model.name}
-                  </PromptInputModelSelectItem>
+                  </SelectItem>
                 ))}
-              </PromptInputModelSelectContent>
-            </PromptInputModelSelect>
-          </PromptInputTools>
-          <PromptInputSubmit 
-            disabled={(!input.trim() && attachments.length === 0) || isGenerating || isUploading}
-            status={isGenerating ? 'streaming' : 'ready'}
-          />
-        </PromptInputToolbar>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <PromptInputAction
+            tooltip={isGenerating ? "Stop generation" : "Send message"}
+          >
+            <Button
+              variant="default"
+              size="icon"
+              className="h-8 w-8 rounded-full"
+              onClick={handleSubmit}
+              disabled={(!input.trim() && attachments.length === 0) || isUploading}
+            >
+              {isGenerating ? (
+                <Square className="size-5 fill-current" />
+              ) : (
+                <ArrowUp className="size-5" />
+              )}
+            </Button>
+          </PromptInputAction>
+        </PromptInputActions>
       </PromptInput>
     </div>
   );

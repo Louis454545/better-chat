@@ -18,8 +18,8 @@ export function FileDisplay({
   onRemove,
   className = "" 
 }: FileDisplayProps) {
-  const fileUrl = useQuery(api.files.getFileUrl, { storageId });
-  const metadata = useQuery(api.files.getFileMetadata, { storageId });
+  const fileUrl = useQuery(api.domains.files.index.getFileUrl, { storageId });
+  const metadata = useQuery(api.domains.files.index.getFileMetadata, { storageId });
 
   if (!fileUrl || !metadata) {
     return (

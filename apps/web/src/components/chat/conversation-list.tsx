@@ -21,7 +21,7 @@ export function ConversationList({
   onSelectConversation,
   onNewConversation,
 }: ConversationListProps) {
-  const conversations = useQuery(api.conversations.getConversations);
+  const conversations = useQuery(api.domains.conversations.index.getConversations);
 
   return (
     <div className="h-full flex flex-col">

@@ -1,9 +1,9 @@
 import React from "react";
 import { 
-  Conversation,
-  ConversationContent,
-  ConversationScrollButton,
-} from '@/components/ai-elements/conversation';
+  ChatContainerRoot,
+  ChatContainerContent,
+  ChatContainerScrollAnchor
+} from '@/components/ui/chat-container';
 import { MessageList } from './message-display';
 import type { Message, BaseComponentProps } from "@/shared/types";
 
@@ -30,12 +30,12 @@ export function ConversationView({
   }
 
   return (
-    <Conversation className={`h-full ${className}`}>
-      <ConversationContent>
+    <ChatContainerRoot className={`h-full ${className}`}>
+      <ChatContainerContent>
         <MessageList messages={messages} />
-      </ConversationContent>
-      <ConversationScrollButton />
-    </Conversation>
+        <ChatContainerScrollAnchor />
+      </ChatContainerContent>
+    </ChatContainerRoot>
   );
 }
 

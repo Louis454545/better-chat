@@ -61,8 +61,8 @@ export function useChatState() {
 
 // Settings hook
 export function useSettings() {
-  const userSettings = useQuery(api.settings.getUserSettings);
-  const updateUserSettings = useMutation(api.settings.updateUserSettings);
+  const userSettings = useQuery(api.domains.settings.index.getUserSettings);
+  const updateUserSettings = useMutation(api.domains.settings.index.updateUserSettings);
   const [loadingState, setLoadingState] = useState<LoadingState>('idle');
 
   const updateSettings = useCallback(async (settings: SettingsFormData) => {
@@ -95,7 +95,7 @@ export function useSettings() {
 
 // File upload hook
 export function useFileUpload() {
-  const generateUploadUrl = useMutation(api.files.generateUploadUrl);
+  const generateUploadUrl = useMutation(api.domains.files.index.generateUploadUrl);
   const [uploading, setUploading] = useState(false);
 
   const handleFileSelect: FileSelectHandler = useCallback(async (files) => {
@@ -135,17 +135,17 @@ export function useFileUpload() {
 // Messages hook
 export function useMessages(conversationId?: Id<"conversations">) {
   return useQuery(
-    api.messages.getMessages,
+    api.domains.messages.index.getMessages,
     conversationId ? { conversationId } : "skip"
   );
 }
 
 // Conversations hook
 export function useConversations() {
-  const conversations = useQuery(api.conversations.getConversations);
-  const createConversation = useMutation(api.conversations.createConversation);
-  const updateConversationTitle = useMutation(api.conversations.updateConversationTitle);
-  const deleteConversation = useMutation(api.conversations.deleteConversation);
+  const conversations = useQuery(api.domains.conversations.index.getConversations);
+  const createConversation = useMutation(api.domains.conversations.index.createConversation);
+  const updateConversationTitle = useMutation(api.domains.conversations.index.updateConversationTitle);
+  const deleteConversation = useMutation(api.domains.conversations.index.deleteConversation);
 
   const createNewConversation = useCallback(async (title?: string) => {
     try {
@@ -189,8 +189,8 @@ export function useConversations() {
 
 // Message sending hook
 export function useMessageSending() {
-  const saveMessage = useMutation(api.messages.saveMessage);
-  const generateAIResponseStream = useAction(api.ai.generateAIResponseStream);
+  const saveMessage = useMutation(api.domains.messages.index.saveMessage);
+  const generateAIResponseStream = useAction(api.domains.ai.index.generateAIResponseStream);
   const [generating, setGenerating] = useState(false);
 
   const sendMessage: MessageHandler = useCallback(async (content, attachments) => {

@@ -1,4 +1,8 @@
 {
+  "env": {
+    "BASH_DEFAULT_TIMEOUT_MS": "600000",
+    "BASH_MAX_TIMEOUT_MS": "1200000"
+  },
   "permissions": {
     "allow": [
       "WebFetch(domain:docs.convex.dev)",
@@ -6,7 +10,8 @@
       "Bash(pnpm check-types)",
       "Bash(rm:*)",
       "WebFetch(domain:ui.shadcn.com)",
-      "WebFetch(domain:clerk.com)"
+      "WebFetch(domain:clerk.com)",
+      "mcp__prompt-kit__get_items"
     ],
     "deny": []
   }

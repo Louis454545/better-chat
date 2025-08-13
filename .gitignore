@@ -1,2 +1,5 @@
 node_modules
 .turbo
+
+# YoYo AI version control directory
+.yoyo/

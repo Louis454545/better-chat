@@ -45,7 +45,7 @@ export class AIService {
     // Get messages using direct API calls instead of service methods
     // since actions need to use runQuery
     const { api } = await import("../../_generated/api");
-    const messages = await ctx.runQuery(api.messages.getMessages, { 
+    const messages = await ctx.runQuery(api.domains.messages.index.getMessages, { 
       conversationId: conversationId as Id<"conversations"> 
     });
     
@@ -67,7 +67,7 @@ export class AIService {
         // Add file attachments concurrently with size limits
         const filePromises = msg.attachments.map(async (fileId: Id<"_storage">) => {
           try {
-            const metadata = await ctx.runQuery(api.files.getFileMetadata, { storageId: fileId });
+            const metadata = await ctx.runQuery(api.domains.files.index.getFileMetadata, { storageId: fileId });
             
             if (metadata) {
               // Check file size limit (10MB max)
@@ -184,7 +184,7 @@ export class AIService {
       
       // Create assistant message placeholder using API call
       const { api } = await import("../../_generated/api");
-      const messageId = await ctx.runMutation(api.messages.saveMessage, {
+      const messageId = await ctx.runMutation(api.domains.messages.index.saveMessage, {
         conversationId: conversationId as Id<"conversations">,
         role: "assistant",
         content: "",
@@ -201,7 +201,7 @@ export class AIService {
         
         // Update the message every batchSize tokens to reduce API calls
         if (updateCount >= batchSize) {
-          await ctx.runMutation(api.messages.updateMessage, {
+          await ctx.runMutation(api.domains.messages.index.updateMessage, {
             messageId: messageId as Id<"messages">,
             content: fullText,
           });
@@ -211,7 +211,7 @@ export class AIService {
       
       // Final update to ensure all content is saved
       if (updateCount > 0) {
-        await ctx.runMutation(api.messages.updateMessage, {
+        await ctx.runMutation(api.domains.messages.index.updateMessage, {
           messageId: messageId as Id<"messages">,
           content: fullText,
         });

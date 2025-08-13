@@ -6,7 +6,7 @@ import type { FileAttachment } from "@/shared/types";
 import { FileService, ErrorService } from "@/shared/services";
 
 export function useFileManagement() {
-  const generateUploadUrl = useMutation(api.files.generateUploadUrl);
+  const generateUploadUrl = useMutation(api.domains.files.index.generateUploadUrl);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
 

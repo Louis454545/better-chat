@@ -23,7 +23,7 @@ import { useSettings } from "@/shared/hooks";
 import { AppSidebar } from "@/components/app-sidebar";
 
 const AuthenticatedChatApp = memo(function AuthenticatedChatApp() {
-  const updateUserSettings = useMutation(api.settings.updateUserSettings);
+  const updateUserSettings = useMutation(api.domains.settings.index.updateUserSettings);
   const { userSettings } = useSettings();
   
   const {

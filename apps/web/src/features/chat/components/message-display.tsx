@@ -3,19 +3,18 @@ import { useQuery } from "convex/react";
 import { api } from "@my-better-t-app/backend/convex/_generated/api";
 import type { Id } from "@my-better-t-app/backend/convex/_generated/dataModel";
 import type { Message, BaseComponentProps } from "@/shared/types";
-import { Response } from '@/components/ai-elements/response';
 import { 
-  Message as AIMessage, 
+  Message as PromptKitMessage, 
   MessageContent 
-} from '@/components/ai-elements/message';
+} from '@/components/ui/message';
 
 interface AttachmentDisplayProps {
   storageId: Id<"_storage">;
 }
 
 export function AttachmentDisplay({ storageId }: AttachmentDisplayProps) {
-  const fileUrl = useQuery(api.files.getFileUrl, { storageId });
-  const metadata = useQuery(api.files.getFileMetadata, { storageId });
+  const fileUrl = useQuery(api.domains.files.index.getFileUrl, { storageId });
+  const metadata = useQuery(api.domains.files.index.getFileMetadata, { storageId });
 
   if (!fileUrl || !metadata) return null;
 
@@ -50,9 +49,11 @@ interface MessageItemProps extends BaseComponentProps {
 }
 
 export function MessageItem({ message, className = "" }: MessageItemProps) {
+  const isUser = message.role === "user";
+  
   return (
-    <AIMessage from={message.role} key={message._id} className={className}>
-      <MessageContent>
+    <PromptKitMessage className={`${isUser ? "justify-end" : "justify-start"} ${className}`}>
+      <div className={`rounded-lg p-3 ${isUser ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}`}>
         {/* Show attachments */}
         {message.attachments && message.attachments.length > 0 && (
           <div className="space-y-2 mb-2">
@@ -64,10 +65,12 @@ export function MessageItem({ message, className = "" }: MessageItemProps) {
         
         {/* Show message content */}
         {message.content && (
-          <Response>{message.content}</Response>
+          <MessageContent markdown className="bg-transparent p-0 text-inherit">
+            {message.content}
+          </MessageContent>
         )}
-      </MessageContent>
-    </AIMessage>
+      </div>
+    </PromptKitMessage>
   );
 }
 
